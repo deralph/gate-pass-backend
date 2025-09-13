@@ -12,15 +12,15 @@ import notificationRouter from './routes/notifications.js';
 
 dotenv.config();
 
+
+
+const app = express();
+
 app.use(cors({
   origin: "*", // or restrict to your frontend domain
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
-
-
-const app = express();
-
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
