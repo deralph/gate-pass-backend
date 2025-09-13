@@ -45,7 +45,7 @@ export const getScanHistory = async (req, res) => {
 // Process scan - FIXED VERSION
 export const processScan = async (req, res) => {
   try {
-    const { qrCodeData, studentStaffId } = req.body;
+    const { data,qrCodeData, studentStaffId } = req.body;
     
     if (!qrCodeData) {
       return res.status(400).json({
@@ -54,21 +54,11 @@ export const processScan = async (req, res) => {
       });
     }
     
-    // Parse QR code data
-    const dataParts = qrCodeData.split('|');
-    const data = {};
+    // const userId = data.USER;
+    const userStudentStaffId = qrCodeData.USER;
+    const plateNumber = qrCodeData.CAR;
     
-    dataParts.forEach(part => {
-      const [key, value] = part.split(':');
-      if (key && value) {
-        data[key] = value;
-      }
-    });
-    
-    const userId = data.USER;
-    const plateNumber = data.CAR;
-    
-    if (!userId || !plateNumber) {
+    if (!userStudentStaffId || !plateNumber) {
       return res.status(400).json({
         success: false,
         error: 'Invalid QR code format'
@@ -76,10 +66,10 @@ export const processScan = async (req, res) => {
     }
     
     // Get user and car data
-    const user = await User.findById(userId);
+    const user = await User.findOne({ studentStaffId });
     const car = await Car.findOne({ 
       plateNumber: plateNumber.toUpperCase(),
-      userId 
+      // userId 
     });
     
     if (!user || !car) {
@@ -91,7 +81,7 @@ export const processScan = async (req, res) => {
     
     // Check if user is currently in or out
     const lastScan = await Scan.findOne({ 
-      userId, 
+      // userId, 
       plateNumber: car.plateNumber 
     }).sort({ timestamp: -1 });
     
@@ -102,13 +92,14 @@ export const processScan = async (req, res) => {
     
     // Determine scan type
     const scanType = isCurrentlyIn ? 'out' : 'in';
-    const adminstaff = await User.find({ 
+    const adminstaff = await User.findOne({ 
       studentStaffId 
     })
+    console.log(adminstaff)
     // Create scan record
     const scan = await Scan.create({
-      qrCodeData,
-      userId,
+      qrCodeData:data,
+      userId:adminstaff._id,
       carId: car._id,
       adminId:adminstaff._id,
       scanType,
@@ -146,14 +137,15 @@ export const processScan = async (req, res) => {
 export const updateScanResult = async (req, res) => {
   try {
     const { scanId } = req.params;
-    const { result, reason } = req.body;
+    const { result, reason,isIn } = req.body;
     
     const scan = await Scan.findByIdAndUpdate(
       scanId,
       { 
         status: result,
         reason,
-        processedAt: new Date()
+        processedAt: new Date(),
+        isCurrentlyIn:!isIn
       },
       { new: true }
     ).populate('userId', 'fullName email phoneNumber')

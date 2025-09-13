@@ -16,17 +16,17 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({
-  origin: "*", // or restrict to your frontend domain
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-}));
+// app.use(cors({
+//   origin: "*", // or restrict to your frontend domain
+//   methods: ["GET", "POST", "PUT", "DELETE"],
+//   credentials: true,
+// }));
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Enable CORS
-// app.use(cors());
+app.use(cors());
 
 // Mount routers
 app.use('/api/auth', authRouter);
