@@ -1,5 +1,8 @@
-// controllers/adminController.js
-exports.getAdminStats = async (req, res) => {
+import Scan from '../models/Scan.js';
+import Car from '../models/Car.js';
+import User from '../models/User.js';
+
+export const getAdminStats = async (req, res) => {
   try {
     const totalVehicles = await Car.countDocuments();
     const activeUsers = await User.countDocuments({ isActive: true });

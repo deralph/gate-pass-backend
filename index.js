@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 
 import authRouter from './routes/auth.js';
 import carRouter from './routes/cars.js';
+import adminRouter from './routes/admin.js';
 import scanRouter from './routes/scans.js';
 import userRouter from './routes/user.js';
 import notificationRouter from './routes/notifications.js';
@@ -25,6 +26,7 @@ app.use(cors());
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/cars', carRouter);
+app.use('/api/admin', adminRouter);
 app.use('/api/scans', scanRouter);
 app.use('/api/notifications', notificationRouter);
 

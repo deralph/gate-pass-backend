@@ -175,7 +175,8 @@ export const signInAdmin = async (req, res) => {
     console.log("admin body = ",req.body)
   try {
     // Check if user exists and is admin
-    const user = await User.findOne({ email, role: 'admin' }).select('+password');
+    // const user = await User.findOne({ email, role: 'admin' }).select('+password');
+    const user = await User.findOne({ email }).select('+password');
     console.log("admin user = ", user)
     if (!user) {
       return { 

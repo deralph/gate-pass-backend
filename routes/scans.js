@@ -1,23 +1,15 @@
 // routes/scans.js
 import express from 'express';
+import {getScanHistory,getScanDetails,processScan,updateScanResult} from '../controllers/scanController.js';
+// Remove auth import if you're removing authentication completely
 const router = express.Router();
-import { protect, authorize } from '../middleware/auth.js';
-import {
-  processScan,
-  updateScanResult,
-  getScanHistory,getUserScanHistory,getScanDetails
-} from '../controllers/scanController.js';
 
-// All routes are protected
-router.use(protect);
-
-// Only admins can access scan routes
-router.use(authorize('admin'));
-
-router.post('/process', processScan);
-router.put('/:id/result', updateScanResult);
-router.get('/history/:userId?', getUserScanHistory);
+// Public routes - no authentication required
 router.get('/history', getScanHistory);
 router.get('/:scanId', getScanDetails);
 
-export default  router;
+// Protected routes - still need authentication for processing scans
+router.post('/process', processScan);
+router.put('/:scanId/result', updateScanResult);
+
+export default router;
