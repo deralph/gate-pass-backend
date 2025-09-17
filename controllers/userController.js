@@ -1,29 +1,29 @@
 // backend/controllers/userController.js
-import User from '../models/User.js';
-import Car from '../models/Car.js';
-import Activity from '../models/Activity.js';
+import User from "../models/User.js";
+import Car from "../models/Car.js";
+import Activity from "../models/Activity.js";
 
 // Get user profile
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
-    
+    const user = await User.findById(req.user.id).select("-password");
+
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
-    
+
     res.json({
       success: true,
-      user
+      user,
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    console.error("Get profile error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };
@@ -32,16 +32,16 @@ export const getProfile = async (req, res) => {
 export const getCars = async (req, res) => {
   try {
     const cars = await Car.find({ userId: req.user.id, isActive: true });
-    
+
     res.json({
       success: true,
-      cars
+      cars,
     });
   } catch (error) {
-    console.error('Get cars error:', error);
+    console.error("Get cars error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };
@@ -53,16 +53,16 @@ export const getActivities = async (req, res) => {
     const activities = await Activity.find({ userId: req.user.id })
       .sort({ timestamp: -1 })
       .limit(limit);
-    
+
     res.json({
       success: true,
-      activities
+      activities,
     });
   } catch (error) {
-    console.error('Get activities error:', error);
+    console.error("Get activities error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };
@@ -70,23 +70,49 @@ export const getActivities = async (req, res) => {
 // Update user profile
 export const updateProfile = async (req, res) => {
   try {
-    const { fullName, phoneNumber } = req.body;
-    
+    const { fullName } = req.body;
+
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { fullName, phoneNumber, updatedAt: new Date() },
+      { fullName, updatedAt: new Date() },
       { new: true, runValidators: true }
-    ).select('-password');
-    
+    ).select("-password");
+
+    // Upload profile picture if provided
+    if (req.files && req.files.profilePicture) {
+      const result = await cloudinary.uploader.upload(
+        req.files.profilePicture[0].path,
+        {
+          folder: "aaua-parking/profiles",
+        }
+      );
+
+      const user1 = await User.findByIdAndUpdate(
+        req.user.id,
+        {
+          profilePicture: {
+            url: result.secure_url,
+            publicId: result.public_id,
+          },
+          updatedAt: new Date(),
+        },
+        { new: true, runValidators: true }
+      ).select("-password");
+
+      res.json({
+        success: true,
+        user: user1,
+      });
+    }
     res.json({
       success: true,
-      user
+      user,
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    console.error("Update profile error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };
